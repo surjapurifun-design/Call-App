@@ -1,0 +1,6 @@
+{
+  "name": "Sn Call",
+  "description": "100% offline Google Phone Material You fake call and fake SMS web app ready for Android WebView APK conversion.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

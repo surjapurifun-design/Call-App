@@ -1,0 +1,99 @@
+@import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
+
+@layer base {
+  :root {
+    --font-sans: "Google Sans", "Product Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  }
+
+  html,
+  body {
+    font-family: var(--font-sans);
+    -webkit-tap-highlight-color: transparent;
+    overscroll-behavior-y: none;
+  }
+}
+
+@keyframes incoming-ripple {
+  0% {
+    transform: scale(1);
+    opacity: 0.45;
+  }
+  100% {
+    transform: scale(1.68);
+    opacity: 0;
+  }
+}
+
+@keyframes answer-bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-7px);
+  }
+  65% {
+    transform: translateY(-2px);
+  }
+}
+
+@keyframes slide-up-sheet {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes slide-down-banner {
+  from {
+    transform: translateY(-120%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fade-in-fast {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-incoming-ripple {
+  animation: incoming-ripple 2.1s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+}
+
+.animate-incoming-ripple-delayed {
+  animation: incoming-ripple 2.1s cubic-bezier(0.16, 1, 0.3, 1) 0.7s infinite;
+}
+
+.animate-answer-bounce {
+  animation: answer-bounce 1.8s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+}
+
+.animate-slide-up {
+  animation: slide-up-sheet 240ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-slide-down {
+  animation: slide-down-banner 280ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-fade-in {
+  animation: fade-in-fast 180ms ease-out forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-incoming-ripple,
+  .animate-incoming-ripple-delayed,
+  .animate-answer-bounce {
+    animation: none;
+  }
+}

@@ -1,0 +1,2164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#F8F9FA" id="metaTheme" />
+  <title>Sn Call</title>
+  <style>
+    :root {
+      --bg: #F8F9FA;
+      --surface: #FFFFFF;
+      --surface-soft: #EDF2FA;
+      --surface-input: #F3F6FC;
+      --nav-bg: rgba(243, 246, 252, 0.96);
+      --text: #1F1F1F;
+      --text-muted: #5E5E5E;
+      --border: rgba(0, 0, 0, 0.08);
+      --primary: #0B57D0;
+      --primary-on: #FFFFFF;
+      --pill-bg: #C2E7FF;
+      --pill-on: #001D35;
+      --green: #188038;
+      --green-bright: #1E8E3E;
+      --red: #EA4335;
+      --danger: #B3261E;
+      --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+      --shadow-fab: 0 4px 14px rgba(0, 0, 0, 0.18);
+      --shadow-lg: 0 14px 36px rgba(0, 0, 0, 0.22);
+      --font: "Google Sans", "Product Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    }
+
+    html.dark {
+      --bg: #111318;
+      --surface: #1A1C22;
+      --surface-soft: #22262E;
+      --surface-input: #23262E;
+      --nav-bg: rgba(27, 30, 36, 0.96);
+      --text: #E3E2E6;
+      --text-muted: #A0A3AA;
+      --border: rgba(255, 255, 255, 0.09);
+      --primary: #A8C7FA;
+      --primary-on: #062E6F;
+      --pill-bg: #004A77;
+      --pill-on: #C2E7FF;
+      --danger: #F2B8B5;
+    }
+
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100dvh;
+      overscroll-behavior-y: none;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    button, input, textarea {
+      font-family: inherit;
+      color: inherit;
+    }
+
+    button { cursor: pointer; border: none; background: transparent; }
+
+    .tabular { font-variant-numeric: tabular-nums; }
+    .hidden { display: none !important; }
+
+    /* Top Search Bar */
+    .top-bar {
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      background: var(--bg);
+      padding: 12px 14px 8px;
+    }
+
+    .top-bar-inner {
+      max-width: 920px;
+      margin: 0 auto;
+    }
+
+    .search-pill {
+      position: relative;
+      display: flex;
+      align-items: center;
+      height: 52px;
+      border-radius: 999px;
+      background: var(--surface-soft);
+      padding: 0 8px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .search-pill:focus-within {
+      box-shadow: 0 0 0 2px rgba(11, 87, 208, 0.32);
+    }
+
+    .icon-btn {
+      min-width: 44px;
+      min-height: 44px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      transition: background 150ms ease;
+    }
+
+    .icon-btn:hover { background: rgba(128, 128, 128, 0.12); }
+    .icon-btn:active { transform: scale(0.94); }
+
+    .search-input {
+      flex: 1;
+      min-width: 0;
+      border: none;
+      outline: none;
+      background: transparent;
+      font-size: 15px;
+      padding: 0 6px;
+      color: var(--text);
+    }
+
+    .search-input::placeholder { color: var(--text-muted); }
+
+    /* Overflow Menu */
+    .menu-dropdown {
+      position: absolute;
+      top: 58px;
+      right: 4px;
+      width: 230px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      box-shadow: var(--shadow-lg);
+      padding: 6px 0;
+      z-index: 45;
+      animation: fadeIn 150ms ease;
+    }
+
+    .menu-item {
+      width: 100%;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 14px;
+      text-align: left;
+      color: var(--text);
+    }
+
+    .menu-item:hover { background: var(--surface-soft); }
+    .menu-item.danger { color: var(--danger); }
+    .menu-divider { height: 1px; background: var(--border); margin: 4px 0; }
+
+    /* Main Content */
+    .main {
+      max-width: 920px;
+      margin: 0 auto;
+      padding: 10px 14px 104px;
+    }
+
+    .grid-two {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 18px;
+    }
+
+    @media (min-width: 860px) {
+      .grid-two {
+        grid-template-columns: 7fr 5fr;
+        align-items: start;
+      }
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 26px;
+      padding: 20px;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .card-title {
+      margin: 0;
+      font-size: 19px;
+      font-weight: 500;
+      letter-spacing: -0.01em;
+    }
+
+    .card-sub {
+      margin: 3px 0 0;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    /* Segmented Controls */
+    .sim-toggle {
+      display: inline-flex;
+      background: var(--surface-soft);
+      padding: 3px;
+      border-radius: 999px;
+      flex-shrink: 0;
+    }
+
+    .sim-btn {
+      padding: 5px 11px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+
+    .sim-btn.active {
+      background: var(--primary);
+      color: var(--primary-on);
+    }
+
+    .quick-row {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 10px;
+      margin-bottom: 10px;
+    }
+
+    .quick-btn {
+      padding: 7px 14px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 500;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .quick-btn.active {
+      background: var(--pill-bg);
+      color: var(--pill-on);
+      border-color: transparent;
+    }
+
+    .field-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    @media (min-width: 560px) {
+      .field-grid { grid-template-columns: 1fr 1fr; }
+    }
+
+    .field-label {
+      display: block;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+
+    .text-input, .text-area {
+      width: 100%;
+      border: 1.5px solid transparent;
+      border-radius: 16px;
+      background: var(--surface-input);
+      padding: 12px 14px;
+      font-size: 15px;
+      outline: none;
+      transition: border-color 150ms ease;
+    }
+
+    .text-input:focus, .text-area:focus {
+      border-color: var(--primary);
+    }
+
+    .text-area {
+      resize: none;
+      min-height: 82px;
+      line-height: 1.4;
+    }
+
+    .delay-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 6px;
+      padding: 4px;
+      border-radius: 16px;
+      background: var(--surface-input);
+      margin-bottom: 18px;
+    }
+
+    .delay-grid.cols-3 {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    .delay-btn {
+      height: 38px;
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+
+    .delay-btn.active {
+      background: var(--primary);
+      color: var(--primary-on);
+    }
+
+    .ringtone-box {
+      border-top: 1px solid var(--border);
+      padding-top: 14px;
+      margin-bottom: 18px;
+    }
+
+    .ringtone-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 10px;
+      font-size: 12px;
+    }
+
+    .ringtone-name {
+      color: var(--text-muted);
+      max-width: 190px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .btn-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .tonal-btn {
+      height: 38px;
+      padding: 0 15px;
+      border-radius: 999px;
+      background: var(--surface-soft);
+      color: var(--primary);
+      font-size: 12px;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .outline-btn {
+      height: 38px;
+      padding: 0 14px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-size: 12px;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .cta-btn {
+      width: 100%;
+      height: 52px;
+      border-radius: 999px;
+      background: var(--green);
+      color: #FFFFFF;
+      font-size: 15px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      box-shadow: var(--shadow-sm);
+      transition: transform 120ms ease, filter 120ms ease;
+    }
+
+    .cta-btn:active { transform: scale(0.985); }
+    .cta-btn.blue { background: var(--primary); color: var(--primary-on); height: 48px; font-size: 14px; }
+    .cta-btn.cancel { background: #B3261E; color: #FFFFFF; }
+
+    /* Lists (Recents & Contacts) */
+    .list-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 26px;
+      overflow: hidden;
+    }
+
+    .list-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .create-contact-row {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 15px 20px;
+      border-bottom: 1px solid var(--border);
+      color: var(--primary);
+      font-size: 15px;
+      font-weight: 500;
+      text-align: left;
+    }
+
+    .create-contact-row:hover { background: var(--surface-soft); }
+
+    .avatar {
+      width: 42px;
+      height: 42px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: #FFFFFF;
+      font-weight: 500;
+      font-size: 15px;
+      flex-shrink: 0;
+    }
+
+    .list-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 11px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .list-row:last-child { border-bottom: none; }
+    .list-row:hover { background: var(--surface-input); }
+
+    .row-main {
+      display: flex;
+      align-items: center;
+      gap: 13px;
+      flex: 1;
+      min-width: 0;
+      text-align: left;
+    }
+
+    .row-title {
+      font-size: 15px;
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .row-title.declined { color: var(--danger); }
+
+    .row-meta {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 2px;
+      flex-wrap: wrap;
+    }
+
+    .alpha-header {
+      padding: 10px 20px 4px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--primary);
+    }
+
+    .empty-state {
+      padding: 52px 24px;
+      text-align: center;
+      color: var(--text-muted);
+    }
+
+    .empty-state h3 { margin: 12px 0 4px; font-size: 16px; color: var(--text); font-weight: 500; }
+    .empty-state p { margin: 0; font-size: 13px; }
+
+    /* FAB */
+    .fab {
+      position: fixed;
+      right: 16px;
+      bottom: 88px;
+      z-index: 30;
+      width: 56px;
+      height: 56px;
+      border-radius: 16px;
+      background: var(--pill-bg);
+      color: var(--pill-on);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: var(--shadow-fab);
+      transition: transform 140ms ease;
+    }
+
+    .fab:active { transform: scale(0.93); }
+
+    /* Bottom Navigation */
+    .bottom-nav {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 30;
+      background: var(--nav-bg);
+      backdrop-filter: blur(12px);
+      border-top: 1px solid var(--border);
+    }
+
+    .bottom-nav-inner {
+      max-width: 520px;
+      margin: 0 auto;
+      height: 72px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      align-items: center;
+      padding: 0 8px;
+    }
+
+    .nav-tab {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      min-height: 56px;
+      color: var(--text-muted);
+    }
+
+    .nav-pill {
+      width: 64px;
+      height: 32px;
+      border-radius: 999px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 180ms ease;
+    }
+
+    .nav-tab.active .nav-pill {
+      background: var(--pill-bg);
+      color: var(--pill-on);
+    }
+
+    .nav-label {
+      font-size: 12px;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+
+    .nav-tab.active .nav-label {
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    /* Fullscreen Google Call Overlay */
+    .call-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 60;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      color: #FFFFFF;
+      background: radial-gradient(circle at 50% 18%, #1E3246 0%, #101E2B 48%, #091118 100%);
+      padding: 48px 24px 40px;
+      user-select: none;
+      animation: fadeIn 180ms ease;
+    }
+
+    .call-top {
+      max-width: 420px;
+      width: 100%;
+      margin: 0 auto;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .call-status {
+      font-size: 14px;
+      font-weight: 500;
+      color: rgba(255, 255, 255, 0.82);
+      margin-bottom: 24px;
+    }
+
+    .call-avatar-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 22px;
+    }
+
+    .ripple-ring {
+      position: absolute;
+      width: 96px;
+      height: 96px;
+      border-radius: 999px;
+      animation: incomingRipple 2.1s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+    }
+
+    .ripple-ring.delay { animation-delay: 0.7s; }
+
+    .call-avatar {
+      position: relative;
+      width: 104px;
+      height: 104px;
+      border-radius: 999px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 42px;
+      font-weight: 500;
+      color: #FFFFFF;
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.35);
+    }
+
+    .call-name {
+      margin: 0;
+      font-size: 34px;
+      font-weight: 400;
+      letter-spacing: -0.02em;
+      max-width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .call-number {
+      margin: 8px 0 0;
+      font-size: 17px;
+      color: rgba(255, 255, 255, 0.76);
+    }
+
+    .call-extra {
+      margin-top: 10px;
+      font-size: 12px;
+      color: #FCA5A5;
+    }
+
+    .call-bottom {
+      max-width: 400px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    .incoming-actions {
+      display: flex;
+      justify-content: space-between;
+      padding: 0 22px 12px;
+    }
+
+    .call-circle-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.88);
+    }
+
+    .call-circle-btn {
+      width: 72px;
+      height: 72px;
+      border-radius: 999px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #FFFFFF;
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.38);
+      transition: transform 130ms ease;
+    }
+
+    .call-circle-btn:active { transform: scale(0.93); }
+    .call-circle-btn.decline { background: var(--red); }
+    .call-circle-btn.answer { background: var(--green-bright); animation: answerBounce 1.8s ease infinite; }
+
+    .incall-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 22px 14px;
+      margin-bottom: 34px;
+    }
+
+    .incall-tile {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      color: rgba(255, 255, 255, 0.88);
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .incall-icon {
+      width: 62px;
+      height: 62px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.13);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #FFFFFF;
+      transition: background 150ms ease, color 150ms ease;
+    }
+
+    .incall-tile.active .incall-icon {
+      background: #FFFFFF;
+      color: #101E2B;
+    }
+
+    .incall-tile.rec-active .incall-icon {
+      background: var(--red);
+      color: #FFFFFF;
+    }
+
+    .end-call-row {
+      display: flex;
+      justify-content: center;
+    }
+
+    .incall-keypad {
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 24px;
+      padding: 14px;
+      margin-bottom: 22px;
+    }
+
+    .incall-keypad-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+      padding: 0 8px 10px;
+      margin-bottom: 10px;
+      min-height: 36px;
+    }
+
+    .incall-keypad-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .incall-key {
+      height: 52px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.08);
+      color: #FFFFFF;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .incall-key:active { background: rgba(255, 255, 255, 0.22); }
+
+    /* Slide-up Dialpad Sheet */
+    .sheet-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      background: rgba(0, 0, 0, 0.42);
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      animation: fadeIn 150ms ease;
+    }
+
+    .dialpad-sheet {
+      max-width: 440px;
+      width: 100%;
+      margin: 0 auto;
+      background: var(--surface-input);
+      border-radius: 28px 28px 0 0;
+      padding: 12px 18px 26px;
+      box-shadow: var(--shadow-lg);
+      animation: slideUp 230ms cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .sheet-handle {
+      width: 40px;
+      height: 4px;
+      border-radius: 999px;
+      background: var(--text-muted);
+      opacity: 0.35;
+      margin: 0 auto;
+    }
+
+    .dial-display-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      border-bottom: 1px solid var(--border);
+      padding: 8px 4px 10px;
+      margin-bottom: 12px;
+    }
+
+    .dial-display {
+      flex: 1;
+      text-align: center;
+      font-size: 30px;
+      letter-spacing: 0.04em;
+      border: none;
+      outline: none;
+      background: transparent;
+      min-width: 0;
+    }
+
+    .dial-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    .dial-key {
+      height: 56px;
+      border-radius: 999px;
+      background: var(--surface);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      box-shadow: var(--shadow-sm);
+      transition: transform 100ms ease;
+    }
+
+    .dial-key:active { transform: scale(0.93); background: var(--pill-bg); }
+    .dial-digit { font-size: 25px; line-height: 1; }
+    .dial-letters { font-size: 10px; letter-spacing: 0.14em; color: var(--text-muted); margin-top: 2px; }
+
+    .dial-call-btn {
+      height: 54px;
+      padding: 0 38px;
+      border-radius: 999px;
+      background: var(--green);
+      color: #FFFFFF;
+      font-size: 16px;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .t9-matches {
+      background: var(--surface);
+      border-radius: 16px;
+      overflow: hidden;
+      margin-bottom: 10px;
+      border: 1px solid var(--border);
+    }
+
+    .t9-row {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 12px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .t9-row:last-child { border-bottom: none; }
+
+    /* SMS Heads-up Banner */
+    .sms-banner {
+      position: fixed;
+      top: 12px;
+      left: 12px;
+      right: 12px;
+      max-width: 440px;
+      margin: 0 auto;
+      z-index: 70;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 14px 16px;
+      box-shadow: var(--shadow-lg);
+      animation: slideDown 260ms cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .sms-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    .sms-body-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    .sms-actions {
+      display: flex;
+      gap: 16px;
+      padding-left: 52px;
+      margin-top: 10px;
+    }
+
+    .sms-action-btn {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--primary);
+      padding: 4px 0;
+    }
+
+    .sms-reply-form {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    /* Modal */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 55;
+      background: rgba(0, 0, 0, 0.45);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .modal-card {
+      width: 100%;
+      max-width: 360px;
+      background: var(--surface);
+      border-radius: 26px;
+      padding: 22px;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 92px;
+      transform: translateX(-50%);
+      z-index: 80;
+      background: #2D3139;
+      color: #FFFFFF;
+      font-size: 12px;
+      font-weight: 500;
+      padding: 10px 16px;
+      border-radius: 12px;
+      box-shadow: var(--shadow-fab);
+      white-space: nowrap;
+      max-width: 90vw;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    @keyframes incomingRipple {
+      0% { transform: scale(1); opacity: 0.45; }
+      100% { transform: scale(1.7); opacity: 0; }
+    }
+
+    @keyframes answerBounce {
+      0%, 100% { transform: translateY(0); }
+      40% { transform: translateY(-7px); }
+      65% { transform: translateY(-2px); }
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(100%); }
+      to { transform: translateY(0); }
+    }
+
+    @keyframes slideDown {
+      from { transform: translateY(-120%); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Top Pill Search Bar -->
+  <header class="top-bar">
+    <div class="top-bar-inner">
+      <div class="search-pill">
+        <button class="icon-btn" id="searchFocusBtn" aria-label="Search contacts">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        </button>
+        <input id="searchInput" class="search-input" type="text" placeholder="Sn Call • Search contacts" aria-label="Sn Call search contacts" />
+        <button class="icon-btn hidden" id="clearSearchBtn" aria-label="Clear search">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        </button>
+        <button class="icon-btn" id="micBtn" aria-label="Voice search">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 14a3 3 0 0 0 3-3V6a3 3 0 1 0-6 0v5a3 3 0 0 0 3 3Zm5-3a1 1 0 1 0-2 0 3 3 0 1 1-6 0 1 1 0 1 0-2 0 5 5 0 0 0 4 4.9V19H9a1 1 0 1 0 0 2h6a1 1 0 1 0 0-2h-2v-3.1A5 5 0 0 0 17 11Z"/></svg>
+        </button>
+        <button class="icon-btn" id="menuBtn" aria-label="More options">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="12" cy="19" r="1.8"/></svg>
+        </button>
+
+        <div id="menuDropdown" class="menu-dropdown hidden" role="menu">
+          <button class="menu-item" id="themeToggleBtn" role="menuitem">Toggle Dark / Light Theme</button>
+          <div class="menu-divider"></div>
+          <button class="menu-item danger" id="clearHistoryMenuBtn" role="menuitem">Clear Call History</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Screens -->
+  <main class="main">
+    <!-- TAB 1: FAKE CALL & SMS -->
+    <div id="tab-fake-call" class="grid-two">
+      <section class="card">
+        <div class="card-header">
+          <div>
+            <h1 class="card-title">Fake Call Scheduler</h1>
+            <p class="card-sub">Configure caller identity, delay timer, and ringtone</p>
+          </div>
+          <div class="sim-toggle" role="group" aria-label="Select SIM">
+            <button class="sim-btn active" data-sim="SIM 1">SIM 1</button>
+            <button class="sim-btn" data-sim="SIM 2">SIM 2</button>
+          </div>
+        </div>
+
+        <div class="quick-row" id="quickCallersRow"></div>
+
+        <div class="field-grid">
+          <div>
+            <label class="field-label" for="callerNameInput">Caller Name</label>
+            <input id="callerNameInput" class="text-input" type="text" value="Mom" placeholder="e.g. Mom, Boss" />
+          </div>
+          <div>
+            <label class="field-label" for="callerNumberInput">Mobile Number</label>
+            <input id="callerNumberInput" class="text-input tabular" type="tel" value="+91 98765 43210" placeholder="+91 98765 43210" />
+          </div>
+        </div>
+
+        <span class="field-label">Call Delay Timer</span>
+        <div class="delay-grid" id="callDelayGrid">
+          <button class="delay-btn active" data-delay="0">Now</button>
+          <button class="delay-btn" data-delay="5">5s</button>
+          <button class="delay-btn" data-delay="10">10s</button>
+          <button class="delay-btn" data-delay="30">30s</button>
+          <button class="delay-btn" data-delay="60">1 min</button>
+        </div>
+
+        <div class="ringtone-box">
+          <div class="ringtone-top">
+            <strong>Incoming Ringtone</strong>
+            <span id="ringtoneLabel" class="ringtone-name">Built-in Pixel Chime</span>
+          </div>
+          <input id="ringtoneFileInput" type="file" accept="audio/*" class="hidden" />
+          <div class="btn-row">
+            <button type="button" class="tonal-btn" id="pickRingtoneBtn">Choose Audio / MP3</button>
+            <button type="button" class="outline-btn" id="testRingtoneBtn">Test sound</button>
+            <button type="button" class="outline-btn hidden" id="resetRingtoneBtn">Reset default</button>
+          </div>
+        </div>
+
+        <button type="button" class="cta-btn" id="startCallBtn">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M6.62 10.79a15.05 15.05 0 0 0 6.59 6.59l2.2-2.2a1 1 0 0 1 1.02-.24c1.12.37 2.33.57 3.57.57a1 1 0 0 1 1 1V20a1 1 0 0 1-1 1C10.61 21 3 13.39 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1.02l-2.2 2.2Z"/></svg>
+          <span id="startCallText" class="tabular">Start Fake Call Now</span>
+        </button>
+      </section>
+
+      <section class="card">
+        <div class="card-header">
+          <div>
+            <h2 class="card-title">Fake SMS Notification</h2>
+            <p class="card-sub">Android heads-up message banner with vibration</p>
+          </div>
+        </div>
+
+        <div style="margin-bottom: 12px;">
+          <label class="field-label" for="smsSenderInput">Sender ID / Name</label>
+          <input id="smsSenderInput" class="text-input" type="text" value="Mom" placeholder="e.g. Mom, HDFC Bank" />
+        </div>
+
+        <div style="margin-bottom: 12px;">
+          <label class="field-label" for="smsBodyInput">Message Text</label>
+          <textarea id="smsBodyInput" class="text-area" placeholder="Type incoming message...">Call me back urgently, waiting for you at home.</textarea>
+        </div>
+
+        <span class="field-label">Delivery Delay</span>
+        <div class="delay-grid cols-3" id="smsDelayGrid">
+          <button class="delay-btn active" data-sms-delay="0">Now</button>
+          <button class="delay-btn" data-sms-delay="5">5s</button>
+          <button class="delay-btn" data-sms-delay="10">10s</button>
+        </div>
+
+        <button type="button" class="cta-btn blue" id="sendSmsBtn">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M20 2H4a2 2 0 0 0-2 2v18l4-4h14a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2Z"/></svg>
+          <span id="sendSmsText" class="tabular">Send Fake SMS Notification</span>
+        </button>
+      </section>
+    </div>
+
+    <!-- TAB 2: RECENTS -->
+    <section id="tab-recents" class="list-card hidden">
+      <div class="list-header">
+        <div>
+          <strong style="font-size: 16px;">Recent Calls</strong>
+          <div style="font-size: 12px; color: var(--text-muted);">Tap any log to trigger an instant fake call</div>
+        </div>
+        <button id="clearRecentsTopBtn" class="sms-action-btn hidden">Clear all</button>
+      </div>
+      <div id="recentsContainer"></div>
+    </section>
+
+    <!-- TAB 3: CONTACTS -->
+    <section id="tab-contacts" class="list-card hidden">
+      <button type="button" class="create-contact-row" id="openAddContactBtn">
+        <span class="avatar" style="background: var(--pill-bg); color: var(--pill-on); width: 38px; height: 38px;">+</span>
+        <span>Create new contact</span>
+      </button>
+      <div id="contactsContainer"></div>
+    </section>
+  </main>
+
+  <!-- Dialpad FAB -->
+  <button class="fab" id="openDialpadBtn" aria-label="Open T9 Dialpad">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+      <circle cx="6" cy="5" r="2"/><circle cx="12" cy="5" r="2"/><circle cx="18" cy="5" r="2"/>
+      <circle cx="6" cy="11" r="2"/><circle cx="12" cy="11" r="2"/><circle cx="18" cy="11" r="2"/>
+      <circle cx="6" cy="17" r="2"/><circle cx="12" cy="17" r="2"/><circle cx="18" cy="17" r="2"/>
+      <circle cx="12" cy="22" r="1.8"/>
+    </svg>
+  </button>
+
+  <!-- Bottom Navigation Bar -->
+  <nav class="bottom-nav" aria-label="Main navigation">
+    <div class="bottom-nav-inner">
+      <button class="nav-tab active" data-tab="fake-call">
+        <span class="nav-pill">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M6.62 10.79a15.05 15.05 0 0 0 6.59 6.59l2.2-2.2a1 1 0 0 1 1.02-.24c1.12.37 2.33.57 3.57.57a1 1 0 0 1 1 1V20a1 1 0 0 1-1 1C10.61 21 3 13.39 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1.02l-2.2 2.2Z"/></svg>
+        </span>
+        <span class="nav-label">Fake Call</span>
+      </button>
+      <button class="nav-tab" data-tab="recents">
+        <span class="nav-pill">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+        </span>
+        <span class="nav-label">Recents</span>
+      </button>
+      <button class="nav-tab" data-tab="contacts">
+        <span class="nav-pill">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        </span>
+        <span class="nav-label">Contacts</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Slide-up T9 Dialpad -->
+  <div id="dialpadBackdrop" class="sheet-backdrop hidden">
+    <div class="dialpad-sheet" id="dialpadSheet" role="dialog" aria-modal="true" aria-label="T9 Dialpad">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+        <div style="width:40px;"></div>
+        <div class="sheet-handle"></div>
+        <button class="icon-btn" id="closeDialpadBtn" aria-label="Close dialpad">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div id="t9Matches" class="t9-matches hidden"></div>
+      <div class="dial-display-row">
+        <div style="width:44px;"></div>
+        <input id="dialDisplay" class="dial-display tabular" type="tel" readonly placeholder="Enter number" />
+        <button class="icon-btn" id="dialBackspaceBtn" aria-label="Delete digit">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2Z"/><path d="m18 9-6 6M12 9l6 6"/></svg>
+        </button>
+      </div>
+      <div class="dial-grid" id="dialGrid"></div>
+      <div style="text-align:center;">
+        <button type="button" class="dial-call-btn" id="dialCallBtn">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M6.62 10.79a15.05 15.05 0 0 0 6.59 6.59l2.2-2.2a1 1 0 0 1 1.02-.24c1.12.37 2.33.57 3.57.57a1 1 0 0 1 1 1V20a1 1 0 0 1-1 1C10.61 21 3 13.39 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1.02l-2.2 2.2Z"/></svg>
+          <span>Call</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Fullscreen Google Incoming & Ongoing Call Overlay -->
+  <div id="callOverlay" class="call-overlay hidden" role="dialog" aria-modal="true">
+    <div class="call-top">
+      <div id="callStatusText" class="call-status tabular">Incoming call • SIM 1</div>
+      <div id="callAvatarWrap" class="call-avatar-wrap">
+        <span id="callRipple1" class="ripple-ring"></span>
+        <span id="callRipple2" class="ripple-ring delay"></span>
+        <div id="callAvatar" class="call-avatar">M</div>
+      </div>
+      <h2 id="callNameText" class="call-name">Mom</h2>
+      <p id="callNumberText" class="call-number tabular">+91 98765 43210</p>
+      <div id="callExtraStatus" class="call-extra tabular hidden"></div>
+    </div>
+
+    <div class="call-bottom">
+      <!-- Incoming Buttons -->
+      <div id="incomingActions" class="incoming-actions">
+        <div class="call-circle-wrap">
+          <button type="button" id="declineCallBtn" class="call-circle-btn decline" aria-label="Decline call">
+            <svg width="30" height="30" viewBox="0 0 24 24" fill="currentColor"><path d="M12 9c-1.6 0-3.15.25-4.6.72v3.1c0 .39-.23.74-.56.9-.98.49-1.87 1.12-2.66 1.85a1 1 0 0 1-1.41-.01L.29 13.08a1 1 0 0 1 0-1.41C3.34 8.78 7.46 7 12 7s8.66 1.78 11.71 4.67a1 1 0 0 1 0 1.41l-2.48 2.48a1 1 0 0 1-1.41.01 11.9 11.9 0 0 0-2.66-1.85 1 1 0 0 1-.56-.9v-3.1C15.15 9.25 13.6 9 12 9Z"/></svg>
+          </button>
+          <span>Decline</span>
+        </div>
+        <div class="call-circle-wrap">
+          <button type="button" id="answerCallBtn" class="call-circle-btn answer" aria-label="Answer call">
+            <svg width="30" height="30" viewBox="0 0 24 24" fill="currentColor"><path d="M6.62 10.79a15.05 15.05 0 0 0 6.59 6.59l2.2-2.2a1 1 0 0 1 1.02-.24c1.12.37 2.33.57 3.57.57a1 1 0 0 1 1 1V20a1 1 0 0 1-1 1C10.61 21 3 13.39 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1.02l-2.2 2.2Z"/></svg>
+          </button>
+          <span>Answer</span>
+        </div>
+      </div>
+
+      <!-- Ongoing Controls -->
+      <div id="ongoingActions" class="hidden">
+        <div id="inCallKeypadBox" class="incall-keypad hidden">
+          <div class="incall-keypad-head">
+            <span id="inCallDtmfDisplay" class="tabular" style="font-size:18px;letter-spacing:0.12em;">Keypad</span>
+            <button type="button" id="hideInCallKeypadBtn" style="color:#93C5FD;font-size:12px;font-weight:600;padding:4px 8px;">Hide</button>
+          </div>
+          <div class="incall-keypad-grid" id="inCallKeypadGrid"></div>
+        </div>
+
+        <div id="inCallGrid" class="incall-grid">
+          <button type="button" class="incall-tile" id="tileMute"><span class="incall-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 14a3 3 0 0 0 3-3V6a3 3 0 1 0-6 0v5a3 3 0 0 0 3 3Zm5-3a1 1 0 1 0-2 0 3 3 0 1 1-6 0 1 1 0 1 0-2 0 5 5 0 0 0 4 4.9V19H9a1 1 0 1 0 0 2h6a1 1 0 1 0 0-2h-2v-3.1A5 5 0 0 0 17 11Z"/></svg></span><span>Mute</span></button>
+          <button type="button" class="incall-tile" id="tileKeypad"><span class="incall-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><circle cx="6" cy="5" r="2"/><circle cx="12" cy="5" r="2"/><circle cx="18" cy="5" r="2"/><circle cx="6" cy="11" r="2"/><circle cx="12" cy="11" r="2"/><circle cx="18" cy="11" r="2"/><circle cx="6" cy="17" r="2"/><circle cx="12" cy="17" r="2"/><circle cx="18" cy="17" r="2"/></svg></span><span>Keypad</span></button>
+          <button type="button" class="incall-tile" id="tileSpeaker"><span class="incall-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M3 9v6h4l5 5V4L7 9H3Zm13.5 3A4.5 4.5 0 0 0 14 7.97v8.05c1.48-.73 2.5-2.25 2.5-4.02ZM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77Z"/></svg></span><span>Speaker</span></button>
+          <button type="button" class="incall-tile" id="tileAddCall"><span class="incall-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span><span>Add call</span></button>
+          <button type="button" class="incall-tile" id="tileHold"><span class="incall-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1.5"/><rect x="14" y="5" width="4" height="14" rx="1.5"/></svg></span><span>Hold</span></button>
+          <button type="button" class="incall-tile" id="tileRecord"><span class="incall-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3.5" fill="currentColor"/></svg></span><span id="tileRecordLabel">Record</span></button>
+        </div>
+
+        <div class="end-call-row">
+          <button type="button" id="endCallBtn" class="call-circle-btn decline" aria-label="End call">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M12 9c-1.6 0-3.15.25-4.6.72v3.1c0 .39-.23.74-.56.9-.98.49-1.87 1.12-2.66 1.85a1 1 0 0 1-1.41-.01L.29 13.08a1 1 0 0 1 0-1.41C3.34 8.78 7.46 7 12 7s8.66 1.78 11.71 4.67a1 1 0 0 1 0 1.41l-2.48 2.48a1 1 0 0 1-1.41.01 11.9 11.9 0 0 0-2.66-1.85 1 1 0 0 1-.56-.9v-3.1C15.15 9.25 13.6 9 12 9Z"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Android Heads-Up Fake SMS Banner -->
+  <div id="smsBanner" class="sms-banner hidden" role="status" aria-live="assertive">
+    <div class="sms-head">
+      <div style="display:flex;align-items:center;gap:7px;">
+        <span style="width:20px;height:20px;border-radius:999px;background:#1A73E8;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:11px;">✉</span>
+        <strong style="color:var(--text);">Messages</strong> · now
+      </div>
+      <button type="button" id="dismissSmsBtn" style="padding:4px;color:var(--text-muted);" aria-label="Dismiss SMS">✕</button>
+    </div>
+    <div class="sms-body-row">
+      <div id="smsBannerAvatar" class="avatar" style="width:40px;height:40px;background:#1A73E8;">M</div>
+      <div style="min-width:0;flex:1;">
+        <div id="smsBannerSender" style="font-size:14px;font-weight:600;">Mom</div>
+        <div id="smsBannerText" style="font-size:13px;color:var(--text-muted);margin-top:2px;line-height:1.35;">Message text</div>
+      </div>
+    </div>
+    <div id="smsActionRow" class="sms-actions">
+      <button type="button" class="sms-action-btn" id="smsReplyOpenBtn">Reply</button>
+      <button type="button" class="sms-action-btn" id="smsMarkReadBtn">Mark as read</button>
+    </div>
+    <form id="smsReplyForm" class="sms-reply-form hidden">
+      <input id="smsReplyInput" class="text-input" style="height:36px;padding:0 12px;border-radius:999px;font-size:13px;" placeholder="Type reply..." />
+      <button type="submit" class="tonal-btn" style="height:36px;background:var(--primary);color:var(--primary-on);">Send</button>
+    </form>
+  </div>
+
+  <!-- Add Contact Modal -->
+  <div id="addContactModal" class="modal-backdrop hidden">
+    <div class="modal-card" role="dialog" aria-modal="true" aria-label="Create new contact">
+      <h3 style="margin:0 0 14px;font-size:18px;font-weight:500;">Create new contact</h3>
+      <form id="addContactForm">
+        <div style="margin-bottom:10px;">
+          <label class="field-label" for="newContactName">Name</label>
+          <input id="newContactName" class="text-input" required placeholder="Contact name" />
+        </div>
+        <div style="margin-bottom:10px;">
+          <label class="field-label" for="newContactNumber">Phone Number</label>
+          <input id="newContactNumber" class="text-input tabular" type="tel" required placeholder="+91 98765 43210" />
+        </div>
+        <div style="margin-bottom:16px;">
+          <label class="field-label" for="newContactLabel">Label</label>
+          <input id="newContactLabel" class="text-input" value="Mobile" placeholder="Mobile, Work" />
+        </div>
+        <div style="display:flex;justify-content:flex-end;gap:8px;">
+          <button type="button" class="outline-btn" id="cancelContactBtn">Cancel</button>
+          <button type="submit" class="tonal-btn" style="background:var(--primary);color:var(--primary-on);">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="toast" class="toast hidden"></div>
+
+  <script>
+    (function () {
+      'use strict';
+
+      var CONTACTS_KEY = 'sn_call_contacts_v1';
+      var RECENTS_KEY = 'sn_call_recents_v1';
+      var THEME_KEY = 'sn_call_theme_v1';
+
+      var AVATAR_COLORS = ['#1A73E8', '#188038', '#D93025', '#E37400', '#8430CE', '#007B83', '#C5221F', '#3F51B5'];
+      var DEFAULT_CONTACTS = [
+        { id: 'c-1', name: 'Mom', number: '+91 98765 43210', label: 'Mobile', avatarColor: '#D93025' },
+        { id: 'c-2', name: 'Dad', number: '+91 98201 11223', label: 'Mobile', avatarColor: '#1A73E8' },
+        { id: 'c-3', name: 'Aarav Sharma', number: '+91 98112 77890', label: 'Work', avatarColor: '#188038' },
+        { id: 'c-4', name: 'Boss (Office)', number: '+91 99104 55612', label: 'Work', avatarColor: '#007B83' },
+        { id: 'c-5', name: 'Dr. Mehta Clinic', number: '+91 98220 34511', label: 'Main', avatarColor: '#8430CE' },
+        { id: 'c-6', name: 'Priya Verma', number: '+91 97654 22109', label: 'Mobile', avatarColor: '#E37400' },
+        { id: 'c-7', name: 'Courier Delivery', number: '+91 80456 78901', label: 'Mobile', avatarColor: '#3F51B5' },
+        { id: 'c-8', name: 'Rahul Kumar', number: '+91 96502 88341', label: 'Mobile', avatarColor: '#188038' }
+      ];
+      var QUICK_CALLERS = [
+        { name: 'Mom', number: '+91 98765 43210' },
+        { name: 'Boss', number: '+91 99104 55612' },
+        { name: 'Home', number: '+91 98201 11223' },
+        { name: 'Delivery', number: '+91 80456 78901' }
+      ];
+      var DIAL_KEYS = [
+        { d: '1', l: '∞' }, { d: '2', l: 'ABC' }, { d: '3', l: 'DEF' },
+        { d: '4', l: 'GHI' }, { d: '5', l: 'JKL' }, { d: '6', l: 'MNO' },
+        { d: '7', l: 'PQRS' }, { d: '8', l: 'TUV' }, { d: '9', l: 'WXYZ' },
+        { d: '*', l: '' }, { d: '0', l: '+' }, { d: '#', l: '' }
+      ];
+      var DTMF = {
+        '1': [697, 1209], '2': [697, 1336], '3': [697, 1477],
+        '4': [770, 1209], '5': [770, 1336], '6': [770, 1477],
+        '7': [852, 1209], '8': [852, 1336], '9': [852, 1477],
+        '*': [941, 1209], '0': [941, 1336], '#': [941, 1477]
+      };
+      var T9 = { '2': 'abc', '3': 'def', '4': 'ghi', '5': 'jkl', '6': 'mno', '7': 'pqrs', '8': 'tuv', '9': 'wxyz' };
+
+      function avatarColor(seed) {
+        var s = (seed || 'U').trim(), h = 0;
+        for (var i = 0; i < s.length; i++) h = s.charCodeAt(i) + ((h << 5) - h);
+        return AVATAR_COLORS[Math.abs(h) % AVATAR_COLORS.length];
+      }
+
+      function initials(name) {
+        var clean = (name || '').trim();
+        if (!clean) return '?';
+        var p = clean.split(/\s+/);
+        return p.length === 1 ? p[0][0].toUpperCase() : (p[0][0] + p[p.length - 1][0]).toUpperCase();
+      }
+
+      function fmtDur(sec) {
+        var m = Math.floor(sec / 60), s = sec % 60;
+        return (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
+      }
+
+      function fmtTime(ts) {
+        var d = new Date(ts), now = new Date();
+        var t = d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+        if (d.toDateString() === now.toDateString()) return t;
+        return d.toLocaleDateString([], { month: 'short', day: 'numeric' }) + ', ' + t;
+      }
+
+      function escapeHtml(str) {
+        return String(str).replace(/[&<>"']/g, function (m) {
+          return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[m];
+        });
+      }
+
+      // Offline Audio & Vibration Engine
+      var audioCtx = null, customAudio = null, customUrl = null;
+      var ringTimer = null, vibTimer = null, isRinging = false;
+
+      function ensureCtx() {
+        try {
+          var Ctx = window.AudioContext || window.webkitAudioContext;
+          if (!Ctx) return null;
+          if (!audioCtx) audioCtx = new Ctx();
+          if (audioCtx.state === 'suspended') audioCtx.resume();
+          return audioCtx;
+        } catch (e) { return null; }
+      }
+
+      function vib(pattern) {
+        try { if (navigator.vibrate) navigator.vibrate(pattern); } catch (e) {}
+      }
+
+      function playPixelChime() {
+        var ctx = ensureCtx();
+        if (!ctx) return;
+        var now = ctx.currentTime;
+        var notes = [
+          [523.25, 0.0, 0.22], [659.25, 0.14, 0.22], [783.99, 0.28, 0.26],
+          [1046.5, 0.44, 0.36], [783.99, 0.72, 0.22], [659.25, 0.88, 0.34],
+          [783.99, 1.16, 0.22], [987.77, 1.32, 0.42]
+        ];
+        notes.forEach(function (n) {
+          var o = ctx.createOscillator(), g = ctx.createGain();
+          o.type = 'sine';
+          o.frequency.setValueAtTime(n[0], now + n[1]);
+          g.gain.setValueAtTime(0.0001, now + n[1]);
+          g.gain.exponentialRampToValueAtTime(0.22, now + n[1] + 0.02);
+          g.gain.exponentialRampToValueAtTime(0.0001, now + n[1] + n[2]);
+          o.connect(g); g.connect(ctx.destination);
+          o.start(now + n[1]); o.stop(now + n[1] + n[2] + 0.03);
+        });
+      }
+
+      function startRingtone(withVib) {
+        stopRingtone();
+        isRinging = true;
+        if (customAudio) {
+          customAudio.currentTime = 0;
+          customAudio.loop = true;
+          var p = customAudio.play();
+          if (p && p.catch) {
+            p.catch(function () {
+              if (!isRinging) return;
+              playPixelChime();
+              ringTimer = setInterval(function () { if (isRinging) playPixelChime(); }, 2600);
+            });
+          }
+        } else {
+          playPixelChime();
+          ringTimer = setInterval(function () { if (isRinging) playPixelChime(); }, 2600);
+        }
+        if (withVib) {
+          vib([500, 300, 500, 1000]);
+          vibTimer = setInterval(function () { vib([500, 300, 500, 1000]); }, 2400);
+        }
+      }
+
+      function stopRingtone() {
+        isRinging = false;
+        if (ringTimer) { clearInterval(ringTimer); ringTimer = null; }
+        if (vibTimer) { clearInterval(vibTimer); vibTimer = null; }
+        if (customAudio) { try { customAudio.pause(); customAudio.currentTime = 0; } catch (e) {} }
+        vib(0);
+      }
+
+      function playDtmf(key) {
+        var pair = DTMF[key]; if (!pair) return;
+        var ctx = ensureCtx(); if (!ctx) return;
+        var now = ctx.currentTime;
+        var o1 = ctx.createOscillator(), o2 = ctx.createOscillator(), g = ctx.createGain();
+        o1.frequency.setValueAtTime(pair[0], now);
+        o2.frequency.setValueAtTime(pair[1], now);
+        g.gain.setValueAtTime(0.001, now);
+        g.gain.exponentialRampToValueAtTime(0.11, now + 0.01);
+        g.gain.exponentialRampToValueAtTime(0.001, now + 0.13);
+        o1.connect(g); o2.connect(g); g.connect(ctx.destination);
+        o1.start(now); o2.start(now); o1.stop(now + 0.14); o2.stop(now + 0.14);
+      }
+
+      function playSmsChime() {
+        var ctx = ensureCtx();
+        if (ctx) {
+          var now = ctx.currentTime;
+          [[880, 0, 0.14], [1174.66, 0.11, 0.24]].forEach(function (n) {
+            var o = ctx.createOscillator(), g = ctx.createGain();
+            o.frequency.setValueAtTime(n[0], now + n[1]);
+            g.gain.setValueAtTime(0.0001, now + n[1]);
+            g.gain.exponentialRampToValueAtTime(0.18, now + n[1] + 0.015);
+            g.gain.exponentialRampToValueAtTime(0.0001, now + n[1] + n[2]);
+            o.connect(g); g.connect(ctx.destination);
+            o.start(now + n[1]); o.stop(now + n[1] + n[2] + 0.03);
+          });
+        }
+        vib([110, 70, 140]);
+      }
+
+      function playEndTone() {
+        var ctx = ensureCtx(); if (!ctx) return;
+        var now = ctx.currentTime;
+        [[480, 0, 0.12], [380, 0.14, 0.15]].forEach(function (n) {
+          var o = ctx.createOscillator(), g = ctx.createGain();
+          o.frequency.setValueAtTime(n[0], now + n[1]);
+          g.gain.setValueAtTime(0.0001, now + n[1]);
+          g.gain.exponentialRampToValueAtTime(0.12, now + n[1] + 0.01);
+          g.gain.exponentialRampToValueAtTime(0.0001, now + n[1] + n[2]);
+          o.connect(g); g.connect(ctx.destination);
+          o.start(now + n[1]); o.stop(now + n[1] + n[2] + 0.02);
+        });
+      }
+
+      // State
+      var contacts = [];
+      var recents = [];
+      try {
+        var sc = localStorage.getItem(CONTACTS_KEY);
+        contacts = sc ? JSON.parse(sc) : DEFAULT_CONTACTS.slice();
+        if (!sc) localStorage.setItem(CONTACTS_KEY, JSON.stringify(contacts));
+      } catch (e) { contacts = DEFAULT_CONTACTS.slice(); }
+
+      try {
+        var sr = localStorage.getItem(RECENTS_KEY);
+        recents = sr ? JSON.parse(sr) : [];
+      } catch (e) { recents = []; }
+
+      function saveContacts() { try { localStorage.setItem(CONTACTS_KEY, JSON.stringify(contacts)); } catch (e) {} }
+      function saveRecents() { try { localStorage.setItem(RECENTS_KEY, JSON.stringify(recents)); } catch (e) {} }
+
+      var currentTab = 'fake-call';
+      var selectedSim = 'SIM 1';
+      var callDelay = 0;
+      var callCountdownTimer = null;
+      var smsDelay = 0;
+      var smsCountdownTimer = null;
+      var smsAutoHideTimer = null;
+      var testingSound = false;
+      var dialed = '';
+      var activeCall = null;
+      var callDurSec = 0, callDurTimer = null;
+      var recSec = 0, recTimer = null;
+      var stateMute = false, stateSpeaker = false, stateHold = false, stateRec = false, stateAdd = false;
+      var dtmfStr = '';
+      var toastTimer = null;
+
+      function showToast(msg) {
+        var el = document.getElementById('toast');
+        el.textContent = msg;
+        el.classList.remove('hidden');
+        if (toastTimer) clearTimeout(toastTimer);
+        toastTimer = setTimeout(function () { el.classList.add('hidden'); }, 2600);
+      }
+
+      // Theme init
+      function applyTheme(mode) {
+        document.documentElement.classList.toggle('dark', mode === 'dark');
+        document.getElementById('metaTheme').setAttribute('content', mode === 'dark' ? '#111318' : '#F8F9FA');
+        try { localStorage.setItem(THEME_KEY, mode); } catch (e) {}
+      }
+      try {
+        if (localStorage.getItem(THEME_KEY) === 'dark') applyTheme('dark');
+      } catch (e) {}
+
+      // Tab Switching
+      function setTab(tab) {
+        currentTab = tab;
+        ['fake-call', 'recents', 'contacts'].forEach(function (t) {
+          document.getElementById('tab-' + t).classList.toggle('hidden', t !== tab);
+        });
+        document.querySelectorAll('.nav-tab').forEach(function (btn) {
+          btn.classList.toggle('active', btn.getAttribute('data-tab') === tab);
+        });
+        if (tab === 'recents') renderRecents();
+        if (tab === 'contacts') renderContacts();
+      }
+
+      document.querySelectorAll('.nav-tab').forEach(function (btn) {
+        btn.addEventListener('click', function () { setTab(btn.getAttribute('data-tab')); });
+      });
+
+      // Quick Callers
+      function renderQuickCallers() {
+        var row = document.getElementById('quickCallersRow');
+        row.innerHTML = QUICK_CALLERS.map(function (q, idx) {
+          return '<button type="button" class="quick-btn" data-qidx="' + idx + '">' + escapeHtml(q.name) + '</button>';
+        }).join('');
+        row.querySelectorAll('.quick-btn').forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            var q = QUICK_CALLERS[Number(btn.getAttribute('data-qidx'))];
+            document.getElementById('callerNameInput').value = q.name;
+            document.getElementById('callerNumberInput').value = q.number;
+            row.querySelectorAll('.quick-btn').forEach(function (b) { b.classList.remove('active'); });
+            btn.classList.add('active');
+          });
+        });
+      }
+      renderQuickCallers();
+
+      // SIM Toggle
+      document.querySelectorAll('.sim-btn').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          selectedSim = btn.getAttribute('data-sim');
+          document.querySelectorAll('.sim-btn').forEach(function (b) { b.classList.remove('active'); });
+          btn.classList.add('active');
+        });
+      });
+
+      // Delay Timers
+      function updateStartBtnLabel() {
+        var labels = { 0: 'Start Fake Call Now', 5: 'Schedule Call (5s)', 10: 'Schedule Call (10s)', 30: 'Schedule Call (30s)', 60: 'Schedule Call (1 min)' };
+        document.getElementById('startCallText').textContent = labels[callDelay] || 'Start Fake Call';
+      }
+
+      document.querySelectorAll('#callDelayGrid .delay-btn').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          if (callCountdownTimer) return;
+          callDelay = Number(btn.getAttribute('data-delay'));
+          document.querySelectorAll('#callDelayGrid .delay-btn').forEach(function (b) { b.classList.remove('active'); });
+          btn.classList.add('active');
+          updateStartBtnLabel();
+        });
+      });
+
+      document.querySelectorAll('#smsDelayGrid .delay-btn').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          if (smsCountdownTimer) return;
+          smsDelay = Number(btn.getAttribute('data-sms-delay'));
+          document.querySelectorAll('#smsDelayGrid .delay-btn').forEach(function (b) { b.classList.remove('active'); });
+          btn.classList.add('active');
+        });
+      });
+
+      // Ringtone Picker
+      var ringInput = document.getElementById('ringtoneFileInput');
+      document.getElementById('pickRingtoneBtn').addEventListener('click', function () { ringInput.click(); });
+      ringInput.addEventListener('change', function (e) {
+        var file = e.target.files && e.target.files[0];
+        if (!file) return;
+        stopRingtone();
+        testingSound = false;
+        document.getElementById('testRingtoneBtn').textContent = 'Test sound';
+        if (customUrl) URL.revokeObjectURL(customUrl);
+        customUrl = URL.createObjectURL(file);
+        customAudio = new Audio(customUrl);
+        customAudio.loop = true;
+        document.getElementById('ringtoneLabel').textContent = file.name;
+        document.getElementById('resetRingtoneBtn').classList.remove('hidden');
+        showToast('Ringtone set: ' + file.name);
+      });
+
+      document.getElementById('resetRingtoneBtn').addEventListener('click', function () {
+        stopRingtone();
+        testingSound = false;
+        document.getElementById('testRingtoneBtn').textContent = 'Test sound';
+        if (customUrl) { URL.revokeObjectURL(customUrl); customUrl = null; }
+        customAudio = null;
+        ringInput.value = '';
+        document.getElementById('ringtoneLabel').textContent = 'Built-in Pixel Chime';
+        document.getElementById('resetRingtoneBtn').classList.add('hidden');
+        showToast('Switched to built-in offline ringtone');
+      });
+
+      document.getElementById('testRingtoneBtn').addEventListener('click', function () {
+        ensureCtx();
+        if (testingSound) {
+          stopRingtone();
+          testingSound = false;
+          this.textContent = 'Test sound';
+        } else {
+          startRingtone(false);
+          testingSound = true;
+          this.textContent = 'Stop preview';
+        }
+      });
+
+      // Launch Incoming Call Overlay
+      function launchCall(name, number, color, sim) {
+        if (testingSound) {
+          stopRingtone();
+          testingSound = false;
+          document.getElementById('testRingtoneBtn').textContent = 'Test sound';
+        }
+        ensureCtx();
+        var cleanName = (name || '').trim() || 'Unknown Caller';
+        var cleanNum = (number || '').trim() || '+91 98765 43210';
+        var col = color || avatarColor(cleanName);
+        var useSim = sim || selectedSim;
+
+        activeCall = { name: cleanName, number: cleanNum, color: col, sim: useSim };
+        callDurSec = 0; recSec = 0;
+        stateMute = stateSpeaker = stateHold = stateRec = stateAdd = false;
+        dtmfStr = '';
+
+        document.getElementById('callStatusText').textContent = 'Incoming call • ' + useSim;
+        document.getElementById('callNameText').textContent = cleanName;
+        document.getElementById('callNumberText').textContent = cleanNum;
+        document.getElementById('callAvatar').textContent = initials(cleanName);
+        document.getElementById('callAvatar').style.background = col;
+        document.getElementById('callRipple1').style.background = col + '66';
+        document.getElementById('callRipple2').style.background = col + '44';
+        document.getElementById('callRipple1').classList.remove('hidden');
+        document.getElementById('callRipple2').classList.remove('hidden');
+        document.getElementById('callAvatarWrap').classList.remove('hidden');
+        document.getElementById('callExtraStatus').classList.add('hidden');
+        document.getElementById('incomingActions').classList.remove('hidden');
+        document.getElementById('ongoingActions').classList.add('hidden');
+        document.getElementById('inCallKeypadBox').classList.add('hidden');
+        document.getElementById('inCallGrid').classList.remove('hidden');
+        syncInCallTiles();
+
+        document.getElementById('callOverlay').classList.remove('hidden');
+        startRingtone(true);
+      }
+
+      function finishCall(status, durSec) {
+        stopRingtone();
+        if (callDurTimer) { clearInterval(callDurTimer); callDurTimer = null; }
+        if (recTimer) { clearInterval(recTimer); recTimer = null; }
+        if (activeCall) {
+          recents.unshift({
+            id: 'r-' + Date.now(),
+            name: activeCall.name,
+            number: activeCall.number,
+            sim: activeCall.sim,
+            timestamp: Date.now(),
+            status: status,
+            durationSec: durSec,
+            avatarColor: activeCall.color
+          });
+          recents = recents.slice(0, 100);
+          saveRecents();
+          if (currentTab === 'recents') renderRecents();
+        }
+        activeCall = null;
+        document.getElementById('callOverlay').classList.add('hidden');
+      }
+
+      document.getElementById('answerCallBtn').addEventListener('click', function () {
+        stopRingtone();
+        vib(35);
+        document.getElementById('callRipple1').classList.add('hidden');
+        document.getElementById('callRipple2').classList.add('hidden');
+        document.getElementById('incomingActions').classList.add('hidden');
+        document.getElementById('ongoingActions').classList.remove('hidden');
+        document.getElementById('callStatusText').textContent = activeCall.sim + ' • 00:00';
+
+        callDurTimer = setInterval(function () {
+          callDurSec += 1;
+          updateOngoingStatus();
+        }, 1000);
+      });
+
+      function updateOngoingStatus() {
+        if (!activeCall) return;
+        document.getElementById('callStatusText').textContent =
+          (stateHold ? 'On hold • ' : activeCall.sim + ' • ') + fmtDur(callDurSec);
+      }
+
+      document.getElementById('declineCallBtn').addEventListener('click', function () {
+        stopRingtone(); playEndTone(); vib(50);
+        document.getElementById('callStatusText').textContent = 'Call declined';
+        document.getElementById('incomingActions').classList.add('hidden');
+        setTimeout(function () { finishCall('declined', 0); }, 700);
+      });
+
+      document.getElementById('endCallBtn').addEventListener('click', function () {
+        stopRingtone(); playEndTone(); vib(50);
+        if (callDurTimer) { clearInterval(callDurTimer); callDurTimer = null; }
+        if (recTimer) { clearInterval(recTimer); recTimer = null; }
+        var finalDur = callDurSec;
+        document.getElementById('callStatusText').textContent = 'Call ended • ' + fmtDur(finalDur);
+        document.getElementById('ongoingActions').classList.add('hidden');
+        setTimeout(function () { finishCall('answered', finalDur); }, 800);
+      });
+
+      function syncInCallTiles() {
+        document.getElementById('tileMute').classList.toggle('active', stateMute);
+        document.getElementById('tileSpeaker').classList.toggle('active', stateSpeaker);
+        document.getElementById('tileHold').classList.toggle('active', stateHold);
+        document.getElementById('tileAddCall').classList.toggle('active', stateAdd);
+        document.getElementById('tileRecord').classList.toggle('rec-active', stateRec);
+        document.getElementById('tileRecordLabel').textContent = stateRec ? 'Stop rec' : 'Record';
+        var extra = document.getElementById('callExtraStatus');
+        var parts = [];
+        if (stateRec) parts.push('Recording • ' + fmtDur(recSec));
+        if (stateAdd) parts.push('Ready to add call');
+        if (parts.length) {
+          extra.textContent = parts.join('   ');
+          extra.classList.remove('hidden');
+        } else {
+          extra.classList.add('hidden');
+        }
+      }
+
+      document.getElementById('tileMute').addEventListener('click', function () { vib(20); stateMute = !stateMute; syncInCallTiles(); });
+      document.getElementById('tileSpeaker').addEventListener('click', function () { vib(20); stateSpeaker = !stateSpeaker; syncInCallTiles(); });
+      document.getElementById('tileHold').addEventListener('click', function () { vib(20); stateHold = !stateHold; updateOngoingStatus(); syncInCallTiles(); });
+      document.getElementById('tileAddCall').addEventListener('click', function () { vib(20); stateAdd = !stateAdd; syncInCallTiles(); });
+      document.getElementById('tileRecord').addEventListener('click', function () {
+        vib(25);
+        stateRec = !stateRec;
+        if (stateRec) {
+          recSec = 0;
+          recTimer = setInterval(function () { recSec += 1; syncInCallTiles(); }, 1000);
+        } else if (recTimer) {
+          clearInterval(recTimer); recTimer = null; recSec = 0;
+        }
+        syncInCallTiles();
+      });
+
+      document.getElementById('tileKeypad').addEventListener('click', function () {
+        vib(20);
+        document.getElementById('inCallGrid').classList.add('hidden');
+        document.getElementById('callAvatarWrap').classList.add('hidden');
+        document.getElementById('inCallKeypadBox').classList.remove('hidden');
+      });
+
+      document.getElementById('hideInCallKeypadBtn').addEventListener('click', function () {
+        document.getElementById('inCallKeypadBox').classList.add('hidden');
+        document.getElementById('inCallGrid').classList.remove('hidden');
+        document.getElementById('callAvatarWrap').classList.remove('hidden');
+      });
+
+      // Build In-Call DTMF Keypad
+      var inCallPad = document.getElementById('inCallKeypadGrid');
+      DIAL_KEYS.forEach(function (k) {
+        var b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'incall-key';
+        b.innerHTML = '<span style="font-size:21px;line-height:1;">' + k.d + '</span>' + (k.l && k.d !== '1' ? '<span style="font-size:9px;opacity:0.6;letter-spacing:0.12em;">' + k.l + '</span>' : '');
+        b.addEventListener('click', function () {
+          playDtmf(k.d); vib(18);
+          dtmfStr = (dtmfStr + k.d).slice(-22);
+          document.getElementById('inCallDtmfDisplay').textContent = dtmfStr || 'Keypad';
+        });
+        inCallPad.appendChild(b);
+      });
+
+      // Start / Schedule Call Button
+      document.getElementById('startCallBtn').addEventListener('click', function () {
+        ensureCtx();
+        var btn = this;
+        if (callCountdownTimer) {
+          clearInterval(callCountdownTimer);
+          callCountdownTimer = null;
+          btn.classList.remove('cancel');
+          updateStartBtnLabel();
+          showToast('Scheduled call cancelled');
+          return;
+        }
+        var name = document.getElementById('callerNameInput').value;
+        var num = document.getElementById('callerNumberInput').value;
+        if (callDelay <= 0) {
+          launchCall(name, num, null, selectedSim);
+          return;
+        }
+        var left = callDelay;
+        btn.classList.add('cancel');
+        document.getElementById('startCallText').textContent = 'Incoming in ' + fmtDur(left) + ' · Tap to cancel';
+        callCountdownTimer = setInterval(function () {
+          left -= 1;
+          if (left <= 0) {
+            clearInterval(callCountdownTimer);
+            callCountdownTimer = null;
+            btn.classList.remove('cancel');
+            updateStartBtnLabel();
+            launchCall(name, num, null, selectedSim);
+          } else {
+            document.getElementById('startCallText').textContent = 'Incoming in ' + fmtDur(left) + ' · Tap to cancel';
+          }
+        }, 1000);
+      });
+
+      // Fake SMS Banner
+      function showSmsBanner(sender, msg) {
+        playSmsChime();
+        var s = (sender || '').trim() || 'Messages';
+        var m = (msg || '').trim() || 'New message received.';
+        var col = avatarColor(s);
+        document.getElementById('smsBannerAvatar').textContent = initials(s);
+        document.getElementById('smsBannerAvatar').style.background = col;
+        document.getElementById('smsBannerSender').textContent = s;
+        document.getElementById('smsBannerText').textContent = m;
+        document.getElementById('smsActionRow').classList.remove('hidden');
+        document.getElementById('smsReplyForm').classList.add('hidden');
+        document.getElementById('smsReplyInput').value = '';
+        document.getElementById('smsBanner').classList.remove('hidden');
+        if (smsAutoHideTimer) clearTimeout(smsAutoHideTimer);
+        smsAutoHideTimer = setTimeout(hideSmsBanner, 7500);
+      }
+
+      function hideSmsBanner() {
+        document.getElementById('smsBanner').classList.add('hidden');
+        if (smsAutoHideTimer) { clearTimeout(smsAutoHideTimer); smsAutoHideTimer = null; }
+      }
+
+      document.getElementById('dismissSmsBtn').addEventListener('click', hideSmsBanner);
+      document.getElementById('smsMarkReadBtn').addEventListener('click', hideSmsBanner);
+      document.getElementById('smsReplyOpenBtn').addEventListener('click', function () {
+        document.getElementById('smsActionRow').classList.add('hidden');
+        document.getElementById('smsReplyForm').classList.remove('hidden');
+        document.getElementById('smsReplyInput').focus();
+      });
+      document.getElementById('smsReplyForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+        hideSmsBanner();
+        showToast('Reply sent');
+      });
+
+      document.getElementById('sendSmsBtn').addEventListener('click', function () {
+        ensureCtx();
+        var btn = this;
+        if (smsCountdownTimer) {
+          clearInterval(smsCountdownTimer);
+          smsCountdownTimer = null;
+          btn.classList.remove('cancel');
+          document.getElementById('sendSmsText').textContent = 'Send Fake SMS Notification';
+          showToast('Scheduled SMS cancelled');
+          return;
+        }
+        var sender = document.getElementById('smsSenderInput').value;
+        var msg = document.getElementById('smsBodyInput').value;
+        if (smsDelay <= 0) {
+          showSmsBanner(sender, msg);
+          return;
+        }
+        var left = smsDelay;
+        btn.classList.add('cancel');
+        document.getElementById('sendSmsText').textContent = 'Arriving in ' + left + 's · Tap to cancel';
+        smsCountdownTimer = setInterval(function () {
+          left -= 1;
+          if (left <= 0) {
+            clearInterval(smsCountdownTimer);
+            smsCountdownTimer = null;
+            btn.classList.remove('cancel');
+            document.getElementById('sendSmsText').textContent = 'Send Fake SMS Notification';
+            showSmsBanner(sender, msg);
+          } else {
+            document.getElementById('sendSmsText').textContent = 'Arriving in ' + left + 's · Tap to cancel';
+          }
+        }, 1000);
+      });
+
+      // Render Recents
+      function renderRecents() {
+        var q = document.getElementById('searchInput').value.trim().toLowerCase();
+        var list = q ? recents.filter(function (r) { return r.name.toLowerCase().indexOf(q) >= 0 || r.number.toLowerCase().indexOf(q) >= 0; }) : recents;
+        document.getElementById('clearRecentsTopBtn').classList.toggle('hidden', recents.length === 0);
+        var box = document.getElementById('recentsContainer');
+        if (list.length === 0) {
+          box.innerHTML = '<div class="empty-state"><h3>' + (q ? 'No matching recent calls' : 'No recent fake calls yet') + '</h3><p>Every triggered fake call is automatically logged offline here.</p></div>';
+          return;
+        }
+        box.innerHTML = list.map(function (r) {
+          var declined = r.status !== 'answered';
+          return '<div class="list-row">' +
+            '<button type="button" class="row-main" data-call-recent="' + escapeHtml(r.id) + '">' +
+              '<span class="avatar" style="background:' + escapeHtml(r.avatarColor) + ';">' + escapeHtml(initials(r.name)) + '</span>' +
+              '<div style="min-width:0;flex:1;">' +
+                '<div class="row-title' + (declined ? ' declined' : '') + '">' + escapeHtml(r.name) + '</div>' +
+                '<div class="row-meta tabular">' +
+                  '<span style="color:' + (declined ? '#D93025' : '#188038') + ';">' + (declined ? '↙ Declined' : '↙ ' + fmtDur(r.durationSec)) + '</span>' +
+                  '<span>·</span><span>' + escapeHtml(r.sim || 'SIM 1') + '</span>' +
+                  '<span>·</span><span>' + escapeHtml(fmtTime(r.timestamp)) + '</span>' +
+                '</div>' +
+              '</div>' +
+            '</button>' +
+            '<button type="button" class="icon-btn" data-call-recent="' + escapeHtml(r.id) + '" aria-label="Call">' +
+              '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M6.62 10.79a15.05 15.05 0 0 0 6.59 6.59l2.2-2.2a1 1 0 0 1 1.02-.24c1.12.37 2.33.57 3.57.57a1 1 0 0 1 1 1V20a1 1 0 0 1-1 1C10.61 21 3 13.39 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1.02l-2.2 2.2Z"/></svg>' +
+            '</button>' +
+          '</div>';
+        }).join('');
+        box.querySelectorAll('[data-call-recent]').forEach(function (el) {
+          el.addEventListener('click', function () {
+            var id = el.getAttribute('data-call-recent');
+            var item = recents.find(function (x) { return x.id === id; });
+            if (item) launchCall(item.name, item.number, item.avatarColor, item.sim);
+          });
+        });
+      }
+
+      // Render Contacts
+      function renderContacts() {
+        var q = document.getElementById('searchInput').value.trim().toLowerCase();
+        var sorted = contacts.slice().sort(function (a, b) { return a.name.localeCompare(b.name); });
+        var list = q ? sorted.filter(function (c) { return c.name.toLowerCase().indexOf(q) >= 0 || c.number.toLowerCase().indexOf(q) >= 0; }) : sorted;
+        var box = document.getElementById('contactsContainer');
+        if (list.length === 0) {
+          box.innerHTML = '<div class="empty-state"><h3>No contacts found</h3><p>Add a new offline contact above.</p></div>';
+          return;
+        }
+        var html = '', lastLetter = '';
+        list.forEach(function (c) {
+          var first = c.name.trim().charAt(0).toUpperCase();
+          var letter = /[A-Z]/.test(first) ? first : '#';
+          if (letter !== lastLetter) {
+            html += '<div class="alpha-header">' + letter + '</div>';
+            lastLetter = letter;
+          }
+          html += '<div class="list-row">' +
+            '<button type="button" class="row-main" data-call-contact="' + escapeHtml(c.id) + '">' +
+              '<span class="avatar" style="background:' + escapeHtml(c.avatarColor) + ';">' + escapeHtml(initials(c.name)) + '</span>' +
+              '<div style="min-width:0;flex:1;">' +
+                '<div class="row-title">' + escapeHtml(c.name) + '</div>' +
+                '<div class="row-meta tabular">' + escapeHtml(c.number) + (c.label ? ' · ' + escapeHtml(c.label) : '') + '</div>' +
+              '</div>' +
+            '</button>' +
+            '<button type="button" class="icon-btn" style="color:#188038;" data-call-contact="' + escapeHtml(c.id) + '" aria-label="Trigger fake call">' +
+              '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M6.62 10.79a15.05 15.05 0 0 0 6.59 6.59l2.2-2.2a1 1 0 0 1 1.02-.24c1.12.37 2.33.57 3.57.57a1 1 0 0 1 1 1V20a1 1 0 0 1-1 1C10.61 21 3 13.39 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1.02l-2.2 2.2Z"/></svg>' +
+            '</button>' +
+          '</div>';
+        });
+        box.innerHTML = html;
+        box.querySelectorAll('[data-call-contact]').forEach(function (el) {
+          el.addEventListener('click', function () {
+            var id = el.getAttribute('data-call-contact');
+            var c = contacts.find(function (x) { return x.id === id; });
+            if (c) launchCall(c.name, c.number, c.avatarColor);
+          });
+        });
+      }
+
+      // Slide-up T9 Dialpad
+      function matchesT9(contact, digits) {
+        var clean = digits.replace(/[^0-9]/g, '');
+        if (!clean) return false;
+        if (contact.number.replace(/[^0-9]/g, '').indexOf(clean) >= 0) return true;
+        var lower = contact.name.toLowerCase(), code = '';
+        for (var i = 0; i < lower.length; i++) {
+          for (var d in T9) { if (T9[d].indexOf(lower[i]) >= 0) { code += d; break; } }
+        }
+        return code.indexOf(clean) >= 0;
+      }
+
+      function updateDialpadUI() {
+        document.getElementById('dialDisplay').value = dialed;
+        var box = document.getElementById('t9Matches');
+        if (!dialed) { box.classList.add('hidden'); box.innerHTML = ''; return; }
+        var found = contacts.filter(function (c) { return matchesT9(c, dialed); }).slice(0, 3);
+        if (!found.length) { box.classList.add('hidden'); box.innerHTML = ''; return; }
+        box.classList.remove('hidden');
+        box.innerHTML = found.map(function (c) {
+          return '<button type="button" class="t9-row" data-t9-id="' + escapeHtml(c.id) + '">' +
+            '<span class="avatar" style="width:34px;height:34px;font-size:13px;background:' + escapeHtml(c.avatarColor) + ';">' + escapeHtml(initials(c.name)) + '</span>' +
+            '<div style="min-width:0;flex:1;"><div style="font-size:14px;font-weight:500;">' + escapeHtml(c.name) + '</div><div style="font-size:12px;color:var(--text-muted);" class="tabular">' + escapeHtml(c.number) + '</div></div>' +
+          '</button>';
+        }).join('');
+        box.querySelectorAll('[data-t9-id]').forEach(function (el) {
+          el.addEventListener('click', function () {
+            var c = contacts.find(function (x) { return x.id === el.getAttribute('data-t9-id'); });
+            if (c) { closeDialpad(); launchCall(c.name, c.number, c.avatarColor); }
+          });
+        });
+      }
+
+      var dialGrid = document.getElementById('dialGrid');
+      DIAL_KEYS.forEach(function (k) {
+        var b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'dial-key';
+        b.innerHTML = '<span class="dial-digit tabular">' + k.d + '</span>' + (k.l ? '<span class="dial-letters">' + k.l + '</span>' : '');
+        b.addEventListener('click', function () {
+          playDtmf(k.d); vib(18);
+          dialed = (dialed + k.d).slice(0, 20);
+          updateDialpadUI();
+        });
+        dialGrid.appendChild(b);
+      });
+
+      function openDialpad() {
+        ensureCtx();
+        document.getElementById('dialpadBackdrop').classList.remove('hidden');
+        updateDialpadUI();
+      }
+      function closeDialpad() {
+        document.getElementById('dialpadBackdrop').classList.add('hidden');
+      }
+
+      document.getElementById('openDialpadBtn').addEventListener('click', openDialpad);
+      document.getElementById('closeDialpadBtn').addEventListener('click', closeDialpad);
+      document.getElementById('dialpadBackdrop').addEventListener('click', function (e) {
+        if (e.target === this) closeDialpad();
+      });
+      document.getElementById('dialBackspaceBtn').addEventListener('click', function () {
+        vib(12); dialed = dialed.slice(0, -1); updateDialpadUI();
+      });
+      document.getElementById('dialCallBtn').addEventListener('click', function () {
+        if (!dialed.trim()) return;
+        var found = contacts.find(function (c) { return matchesT9(c, dialed); });
+        var num = dialed.trim();
+        dialed = '';
+        closeDialpad();
+        if (found) launchCall(found.name, found.number, found.avatarColor);
+        else launchCall(num, num);
+      });
+
+      // Search & Menu
+      var searchInput = document.getElementById('searchInput');
+      var clearSearchBtn = document.getElementById('clearSearchBtn');
+      var micBtn = document.getElementById('micBtn');
+      document.getElementById('searchFocusBtn').addEventListener('click', function () { searchInput.focus(); });
+      searchInput.addEventListener('input', function () {
+        var has = searchInput.value.trim().length > 0;
+        clearSearchBtn.classList.toggle('hidden', !has);
+        micBtn.classList.toggle('hidden', has);
+        if (has && currentTab === 'fake-call') setTab('contacts');
+        if (currentTab === 'contacts') renderContacts();
+        if (currentTab === 'recents') renderRecents();
+      });
+      clearSearchBtn.addEventListener('click', function () {
+        searchInput.value = '';
+        clearSearchBtn.classList.add('hidden');
+        micBtn.classList.remove('hidden');
+        if (currentTab === 'contacts') renderContacts();
+        if (currentTab === 'recents') renderRecents();
+      });
+      micBtn.addEventListener('click', function () {
+        searchInput.focus();
+        showToast('Offline mode: type name or number to search');
+      });
+
+      var menuDropdown = document.getElementById('menuDropdown');
+      document.getElementById('menuBtn').addEventListener('click', function (e) {
+        e.stopPropagation();
+        menuDropdown.classList.toggle('hidden');
+      });
+      document.addEventListener('click', function () { menuDropdown.classList.add('hidden'); });
+
+      document.getElementById('themeToggleBtn').addEventListener('click', function () {
+        applyTheme(document.documentElement.classList.contains('dark') ? 'light' : 'dark');
+        menuDropdown.classList.add('hidden');
+      });
+
+      function clearAllRecents() {
+        recents = [];
+        saveRecents();
+        renderRecents();
+        showToast('Call history cleared');
+      }
+      document.getElementById('clearHistoryMenuBtn').addEventListener('click', function () {
+        menuDropdown.classList.add('hidden');
+        clearAllRecents();
+      });
+      document.getElementById('clearRecentsTopBtn').addEventListener('click', clearAllRecents);
+
+      // Add Contact Modal
+      var addModal = document.getElementById('addContactModal');
+      document.getElementById('openAddContactBtn').addEventListener('click', function () {
+        addModal.classList.remove('hidden');
+        document.getElementById('newContactName').focus();
+      });
+      document.getElementById('cancelContactBtn').addEventListener('click', function () { addModal.classList.add('hidden'); });
+      addModal.addEventListener('click', function (e) { if (e.target === addModal) addModal.classList.add('hidden'); });
+      document.getElementById('addContactForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+        var name = document.getElementById('newContactName').value.trim();
+        var num = document.getElementById('newContactNumber').value.trim();
+        var lbl = document.getElementById('newContactLabel').value.trim() || 'Mobile';
+        if (!name || !num) return;
+        contacts.push({ id: 'c-' + Date.now(), name: name, number: num, label: lbl, avatarColor: avatarColor(name) });
+        saveContacts();
+        document.getElementById('newContactName').value = '';
+        document.getElementById('newContactNumber').value = '';
+        addModal.classList.add('hidden');
+        renderContacts();
+        showToast('Saved ' + name);
+      });
+    })();
+  </script>
+</body>
+</html>
