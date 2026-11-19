@@ -1034,6 +1034,17 @@
 
   <!-- Main Screens -->
   <main class="main">
+    <!-- Native Android Lock-Screen & Background Permissions Card (Only shown inside APK when needed) -->
+    <section id="nativePermCard" class="card hidden" style="margin-bottom: 16px; padding: 16px 18px;">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:10px;">
+        <div>
+          <strong style="font-size:15px;">Lock Screen &amp; Background Calls Setup</strong>
+          <p class="card-sub" style="margin-top:3px;">Enable permissions below so fake calls ring even when screen is locked or while using other apps.</p>
+        </div>
+      </div>
+      <div class="btn-row" id="nativePermButtons"></div>
+    </section>
+
     <!-- TAB 1: FAKE CALL & SMS -->
     <div id="tab-fake-call" class="grid-two">
       <section class="card">
@@ -1648,6 +1659,9 @@
         if (customUrl) { URL.revokeObjectURL(customUrl); customUrl = null; }
         customAudio = null;
         ringInput.value = '';
+        if (window.SnCallNative && typeof window.SnCallNative.clearCustomRingtone === 'function') {
+          try { window.SnCallNative.clearCustomRingtone(); } catch (e) {}
+        }
         document.getElementById('ringtoneLabel').textContent = 'Built-in Pixel Chime';
         document.getElementById('resetRingtoneBtn').classList.add('hidden');
         showToast('Switched to built-in offline ringtone');
@@ -1666,18 +1680,32 @@
         }
       });
 
-      // Launch Incoming Call Overlay
-      function launchCall(name, number, color, sim) {
+      var nativeBridge = window.SnCallNative || null;
+      var hasNativeMain = !!(nativeBridge && typeof nativeBridge.isNativeApp === 'function');
+      var isNativeCallMode = !!(nativeBridge && typeof nativeBridge.isNativeCallScreen === 'function');
+
+      // Launch Incoming Call Overlay (or native IncomingCallActivity in APK)
+      function launchCall(name, number, color, sim, opts) {
+        opts = opts || {};
         if (testingSound) {
           stopRingtone();
           testingSound = false;
           document.getElementById('testRingtoneBtn').textContent = 'Test sound';
         }
-        ensureCtx();
         var cleanName = (name || '').trim() || 'Unknown Caller';
         var cleanNum = (number || '').trim() || '+91 98765 43210';
         var col = color || avatarColor(cleanName);
         var useSim = sim || selectedSim;
+
+        // Inside MainActivity APK, launch dedicated native IncomingCallActivity (uses real Ringtone channel + Vibrator)
+        if (hasNativeMain && !opts.forceWebOverlay) {
+          try {
+            nativeBridge.scheduleCall(cleanName, cleanNum, useSim, col, 0);
+            return;
+          } catch (e) {}
+        }
+
+        if (!isNativeCallMode) ensureCtx();
 
         activeCall = { name: cleanName, number: cleanNum, color: col, sim: useSim };
         callDurSec = 0; recSec = 0;
@@ -1702,13 +1730,40 @@
         syncInCallTiles();
 
         document.getElementById('callOverlay').classList.remove('hidden');
-        startRingtone(true);
+        if (opts.autoAnswer) {
+          enterOngoingCallState();
+        } else if (!isNativeCallMode) {
+          startRingtone(true);
+        }
+      }
+
+      function enterOngoingCallState() {
+        stopRingtone();
+        if (isNativeCallMode && nativeBridge && typeof nativeBridge.onNativeCallAnswered === 'function') {
+          try { nativeBridge.onNativeCallAnswered(); } catch (e) {}
+        }
+        vib(35);
+        document.getElementById('callRipple1').classList.add('hidden');
+        document.getElementById('callRipple2').classList.add('hidden');
+        document.getElementById('incomingActions').classList.add('hidden');
+        document.getElementById('ongoingActions').classList.remove('hidden');
+        document.getElementById('callStatusText').textContent = activeCall.sim + ' • 00:00';
+
+        if (callDurTimer) clearInterval(callDurTimer);
+        callDurTimer = setInterval(function () {
+          callDurSec += 1;
+          updateOngoingStatus();
+        }, 1000);
       }
 
       function finishCall(status, durSec) {
         stopRingtone();
         if (callDurTimer) { clearInterval(callDurTimer); callDurTimer = null; }
         if (recTimer) { clearInterval(recTimer); recTimer = null; }
+        if (isNativeCallMode && nativeBridge && typeof nativeBridge.onNativeCallEnded === 'function') {
+          try { nativeBridge.onNativeCallEnded(status, durSec); } catch (e) {}
+          return;
+        }
         if (activeCall) {
           recents.unshift({
             id: 'r-' + Date.now(),
@@ -1728,20 +1783,7 @@
         document.getElementById('callOverlay').classList.add('hidden');
       }
 
-      document.getElementById('answerCallBtn').addEventListener('click', function () {
-        stopRingtone();
-        vib(35);
-        document.getElementById('callRipple1').classList.add('hidden');
-        document.getElementById('callRipple2').classList.add('hidden');
-        document.getElementById('incomingActions').classList.add('hidden');
-        document.getElementById('ongoingActions').classList.remove('hidden');
-        document.getElementById('callStatusText').textContent = activeCall.sim + ' • 00:00';
-
-        callDurTimer = setInterval(function () {
-          callDurSec += 1;
-          updateOngoingStatus();
-        }, 1000);
-      });
+      document.getElementById('answerCallBtn').addEventListener('click', enterOngoingCallState);
 
       function updateOngoingStatus() {
         if (!activeCall) return;
@@ -1750,10 +1792,14 @@
       }
 
       document.getElementById('declineCallBtn').addEventListener('click', function () {
-        stopRingtone(); playEndTone(); vib(50);
+        stopRingtone();
+        if (isNativeCallMode && nativeBridge && typeof nativeBridge.onNativeCallAnswered === 'function') {
+          try { nativeBridge.onNativeCallAnswered(); } catch (e) {}
+        }
+        playEndTone(); vib(50);
         document.getElementById('callStatusText').textContent = 'Call declined';
         document.getElementById('incomingActions').classList.add('hidden');
-        setTimeout(function () { finishCall('declined', 0); }, 700);
+        setTimeout(function () { finishCall('declined', 0); }, 650);
       });
 
       document.getElementById('endCallBtn').addEventListener('click', function () {
@@ -1763,7 +1809,7 @@
         var finalDur = callDurSec;
         document.getElementById('callStatusText').textContent = 'Call ended • ' + fmtDur(finalDur);
         document.getElementById('ongoingActions').classList.add('hidden');
-        setTimeout(function () { finishCall('answered', finalDur); }, 800);
+        setTimeout(function () { finishCall('answered', finalDur); }, 750);
       });
 
       function syncInCallTiles() {
@@ -1836,17 +1882,29 @@
         if (callCountdownTimer) {
           clearInterval(callCountdownTimer);
           callCountdownTimer = null;
+          if (hasNativeMain) {
+            try { nativeBridge.cancelScheduledCall(); } catch (e) {}
+          }
           btn.classList.remove('cancel');
           updateStartBtnLabel();
           showToast('Scheduled call cancelled');
           return;
         }
-        var name = document.getElementById('callerNameInput').value;
-        var num = document.getElementById('callerNumberInput').value;
+        var name = (document.getElementById('callerNameInput').value || '').trim() || 'Unknown Caller';
+        var num = (document.getElementById('callerNumberInput').value || '').trim() || '+91 98765 43210';
+        var col = avatarColor(name);
         if (callDelay <= 0) {
-          launchCall(name, num, null, selectedSim);
+          launchCall(name, num, col, selectedSim);
           return;
         }
+
+        if (hasNativeMain) {
+          try {
+            nativeBridge.scheduleCall(name, num, selectedSim, col, callDelay);
+            showToast('Scheduled! You can lock screen or switch apps now.');
+          } catch (e) {}
+        }
+
         var left = callDelay;
         btn.classList.add('cancel');
         document.getElementById('startCallText').textContent = 'Incoming in ' + fmtDur(left) + ' · Tap to cancel';
@@ -1857,7 +1915,10 @@
             callCountdownTimer = null;
             btn.classList.remove('cancel');
             updateStartBtnLabel();
-            launchCall(name, num, null, selectedSim);
+            // In native APK, AlarmManager + IncomingCallActivity launches automatically
+            if (!hasNativeMain) {
+              launchCall(name, num, col, selectedSim);
+            }
           } else {
             document.getElementById('startCallText').textContent = 'Incoming in ' + fmtDur(left) + ' · Tap to cancel';
           }
@@ -1906,16 +1967,28 @@
         if (smsCountdownTimer) {
           clearInterval(smsCountdownTimer);
           smsCountdownTimer = null;
+          if (hasNativeMain) {
+            try { nativeBridge.cancelScheduledSms(); } catch (e) {}
+          }
           btn.classList.remove('cancel');
           document.getElementById('sendSmsText').textContent = 'Send Fake SMS Notification';
           showToast('Scheduled SMS cancelled');
           return;
         }
-        var sender = document.getElementById('smsSenderInput').value;
-        var msg = document.getElementById('smsBodyInput').value;
+        var sender = (document.getElementById('smsSenderInput').value || '').trim() || 'Messages';
+        var msg = (document.getElementById('smsBodyInput').value || '').trim() || 'New message received.';
         if (smsDelay <= 0) {
+          if (hasNativeMain) {
+            try { nativeBridge.scheduleSms(sender, msg, 0); } catch (e) {}
+          }
           showSmsBanner(sender, msg);
           return;
+        }
+        if (hasNativeMain) {
+          try {
+            nativeBridge.scheduleSms(sender, msg, smsDelay);
+            showToast('SMS scheduled — works even if phone is locked!');
+          } catch (e) {}
         }
         var left = smsDelay;
         btn.classList.add('cancel');
@@ -1927,7 +2000,7 @@
             smsCountdownTimer = null;
             btn.classList.remove('cancel');
             document.getElementById('sendSmsText').textContent = 'Send Fake SMS Notification';
-            showSmsBanner(sender, msg);
+            if (!hasNativeMain) showSmsBanner(sender, msg);
           } else {
             document.getElementById('sendSmsText').textContent = 'Arriving in ' + left + 's · Tap to cancel';
           }
@@ -2158,6 +2231,79 @@
         renderContacts();
         showToast('Saved ' + name);
       });
+
+      // Native Android Permission Card & Sync Helper
+      function refreshNativeStatus() {
+        if (!hasNativeMain) return;
+        try {
+          var pendingRaw = nativeBridge.consumePendingRecents();
+          if (pendingRaw && pendingRaw !== '[]') {
+            var pending = JSON.parse(pendingRaw);
+            if (Array.isArray(pending) && pending.length > 0) {
+              for (var i = 0; i < pending.length; i++) {
+                recents.unshift(pending[i]);
+              }
+              recents = recents.slice(0, 100);
+              saveRecents();
+              if (currentTab === 'recents') renderRecents();
+            }
+          }
+        } catch (e) {}
+
+        try {
+          var savedRing = nativeBridge.getSavedRingtoneName();
+          if (savedRing) {
+            document.getElementById('ringtoneLabel').textContent = savedRing;
+            document.getElementById('resetRingtoneBtn').classList.remove('hidden');
+          }
+        } catch (e) {}
+
+        try {
+          var status = JSON.parse(nativeBridge.getPermissionStatus());
+          var card = document.getElementById('nativePermCard');
+          var btns = document.getElementById('nativePermButtons');
+          var missing = [];
+          if (!status.notifications) missing.push({ label: 'Allow Notifications', fn: 'requestNotificationPermission' });
+          if (!status.overlay) missing.push({ label: 'Display Over Other Apps', fn: 'openOverlayPermission' });
+          if (!status.fullScreen) missing.push({ label: 'Lock-Screen Full Alerts', fn: 'openFullScreenPermission' });
+          if (!status.exactAlarm) missing.push({ label: 'Allow Exact Alarms', fn: 'openExactAlarmPermission' });
+
+          if (missing.length === 0) {
+            card.classList.add('hidden');
+          } else {
+            card.classList.remove('hidden');
+            btns.innerHTML = missing.map(function (m) {
+              return '<button type="button" class="tonal-btn" data-perm-fn="' + m.fn + '">' + escapeHtml(m.label) + '</button>';
+            }).join('');
+            btns.querySelectorAll('[data-perm-fn]').forEach(function (el) {
+              el.addEventListener('click', function () {
+                var fnName = el.getAttribute('data-perm-fn');
+                if (nativeBridge && typeof nativeBridge[fnName] === 'function') {
+                  nativeBridge[fnName]();
+                }
+              });
+            });
+          }
+        } catch (e) {}
+      }
+
+      window.onSnCallNativeResume = refreshNativeStatus;
+      if (hasNativeMain) refreshNativeStatus();
+
+      // If opened inside IncomingCallActivity (?nativeCall=1), show ONLY the fullscreen Google Call UI immediately
+      (function checkNativeCallLaunch() {
+        try {
+          var params = new URLSearchParams(window.location.search);
+          if (params.get('nativeCall') === '1') {
+            var qName = params.get('name') || 'Unknown Caller';
+            var qNum = params.get('number') || '+91 98765 43210';
+            var qSim = params.get('sim') || 'SIM 1';
+            var qCol = params.get('color') || avatarColor(qName);
+            var qAuto = params.get('autoAnswer') === '1';
+            launchCall(qName, qNum, qCol, qSim, { forceWebOverlay: true, autoAnswer: qAuto });
+          }
+        } catch (e) {}
+      })();
     })();
   </script>
 </body>
