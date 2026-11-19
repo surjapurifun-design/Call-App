@@ -398,15 +398,26 @@ export default function App() {
     showToast('Call history cleared');
   };
 
-  const handleDownloadOfflineHtml = () => {
+  const handleDownloadOfflineHtml = async () => {
     setMenuOpen(false);
-    const link = document.createElement('a');
-    link.href = '/SnCall.html';
-    link.download = 'SnCall.html';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    showToast('Downloading 100% offline SnCall.html');
+    try {
+      const response = await fetch('/SnCall.html');
+      if (!response.ok) throw new Error('File unavailable');
+      const htmlContent = await response.text();
+      const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+      const blobUrl = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = 'SnCall.html';
+      link.rel = 'noopener';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.setTimeout(() => URL.revokeObjectURL(blobUrl), 5000);
+      showToast('Downloading SnCall.html...');
+    } catch {
+      showToast('Download blocked in preview — open app in Chrome browser');
+    }
   };
 
   // Filtered lists for real-time search
