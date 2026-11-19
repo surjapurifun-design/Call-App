@@ -45,18 +45,21 @@ jobs:
           ls -lh release-apks/SnCall-v1.0.0-debug.apk
 
       - name: Build Signed Release APK (when signing secrets are configured)
-        if: ${{ secrets.ANDROID_KEYSTORE_BASE64 != '' && secrets.ANDROID_KEYSTORE_PASSWORD != '' && secrets.ANDROID_KEY_ALIAS != '' && secrets.ANDROID_KEY_PASSWORD != '' }}
         env:
           ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
         run: |
-          echo "$ANDROID_KEYSTORE_BASE64" | base64 -d > android/app/release-keystore.jks
-          export ANDROID_KEYSTORE_PATH="$PWD/android/app/release-keystore.jks"
-          gradle -p android assembleRelease --no-daemon
-          cp android/app/build/outputs/apk/release/app-release.apk release-apks/SnCall.apk
-          rm -f android/app/release-keystore.jks
+          if [ -n "$ANDROID_KEYSTORE_BASE64" ] && [ -n "$ANDROID_KEYSTORE_PASSWORD" ] && [ -n "$ANDROID_KEY_ALIAS" ] && [ -n "$ANDROID_KEY_PASSWORD" ]; then
+            echo "$ANDROID_KEYSTORE_BASE64" | base64 -d > android/app/release-keystore.jks
+            export ANDROID_KEYSTORE_PATH="$PWD/android/app/release-keystore.jks"
+            gradle -p android assembleRelease --no-daemon
+            cp android/app/build/outputs/apk/release/app-release.apk release-apks/SnCall.apk
+            rm -f android/app/release-keystore.jks
+          else
+            echo "Release signing secrets not configured; continuing with debug APK."
+          fi
 
       - name: Upload APK workflow artifact
         uses: actions/upload-artifact@v4
@@ -79,6 +82,6 @@ jobs:
             - Android Heads-Up Fake SMS Notification Banner with Vibration
             - Offline Recents & Contacts stored on device (`localStorage`) + Slide-up T9 Dialpad
 
-            > **Note:** `SnCall-v1.0.0-debug.apk` is a debug-signed APK built directly by GitHub Actions (installable on Android for testing/personal use). To build a release-signed `SnCall.apk`, configure keystore secrets in Repository Settings → Secrets and variables → Actions.
+            > **Note:** `SnCall-v1.0.0-debug.apk` is a debug-signed APK built automatically by GitHub Actions (directly installable on Android for personal use/testing).
           files: release-apks/*.apk
           make_latest: true
